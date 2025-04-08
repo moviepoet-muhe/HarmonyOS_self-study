@@ -16,18 +16,18 @@ struct Index { // 利用struct 结构来定义组件
     Column() {
       //  顶部区域
       Row() {
-        Image($r('app.media.jd_cancel')).width(20)
+        Image($rawfile('jd/img/jd_cancel.svg')).width(20)
         // 系统资源-图标
         SymbolGlyph($r('sys.symbol.flower'))
           .fontSize(20)
           .fontColor([$r('app.color.default_color')])
-        Text('帮助')
+        Text($r('app.string.title'))
       }
       .width('100%')
       .justifyContent(FlexAlign.SpaceBetween)
 
       //  logo
-      Image($r('app.media.jd_logo'))
+      Image($rawfile('jd/img/jd_logo.png'))
         .width(250)
 
       // 输入框区域
@@ -39,7 +39,7 @@ struct Index { // 利用struct 结构来定义组件
         Text('中国（+86）')
           .fontColor('#666')
           .margin({ right: 5 })
-        Image($r('app.media.jd_right'))
+        Image($rawfile('jd/img/jd_right.svg'))
           .width(20)
           .fillColor('#666')
       }
@@ -112,10 +112,10 @@ struct Index { // 利用struct 结构来定义组件
           .fontColor('#666')
           .lineHeight(22)
         Row() {
-          Image($r('app.media.jd_huawei')).width(34)
-          Image($r('app.media.jd_wechat')).width(34).fillColor('#32a539')
-          Image($r('app.media.jd_weibo')).width(34).fillColor('#da3931')
-          Image($r('app.media.jd_QQ')).width(34).fillColor('#11a3f2')
+          Image($rawfile('jd/img/jd_huawei.svg')).width(34)
+          Image($rawfile('jd/img/jd_weibo.svg')).width(34).fillColor('#da3931')
+          Image($rawfile('jd/img/jd_wechat.svg')).width(34).fillColor('#32a539')
+          Image($rawfile('jd/img/jd_QQ.svg')).width(34).fillColor('#11a3f2')
         }
         .margin({ top: 28 })
         .width('100%')
@@ -126,7 +126,7 @@ struct Index { // 利用struct 结构来定义组件
     .padding(20)
     .width('100%')
     .height('100%')
-    .backgroundImage($r('app.media.jd_login_bg'))
+    .backgroundImage($rawfile('jd/img/jd_login_bg.png'))
     .backgroundImageSize(ImageSize.Cover)
   }
 }
