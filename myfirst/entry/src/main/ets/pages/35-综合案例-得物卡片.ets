@@ -1,5 +1,3 @@
-import { router } from '@kit.ArkUI';
-
 @Entry
 @Component
 struct Index {
@@ -48,11 +46,6 @@ struct Index {
       .padding({ bottom: 15 })
       .backgroundColor(Color.White)
       .borderRadius(5)
-
-      Button('返回')
-        .onClick(()=>{
-          router.back()
-        })
     }
     .padding(10)
     .width('100%')
