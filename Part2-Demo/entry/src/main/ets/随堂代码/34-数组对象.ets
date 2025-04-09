@@ -16,11 +16,11 @@ let stuArr: Student[] = [
 ]
 // 包括对象的复杂数据,如果想要在日志中打印, 需要调用一个方法, 转成字符串格式
 // JSON.stringify(复杂类型)  对象/数组
-// console.log('学生数组', JSON.stringify(stuArr))
+console.log('学生数组', JSON.stringify(stuArr))
 
 // 3. 具体使用 (访问 →  通过下标)
-// console.log('小红', stuArr[1].name)
-// console.log('小红', JSON.stringify(stuArr[1]))
+console.log('小红', stuArr[1].name)
+console.log('小红', JSON.stringify(stuArr[1]))
 
 // 4. 也支持遍历 for... of, 普通for
 for (let item of stuArr) {

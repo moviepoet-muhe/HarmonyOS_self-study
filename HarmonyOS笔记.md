@@ -1,5 +1,16 @@
 # HarmonyOS笔记
 
+### 目录
+
+[开发基础知识](#开发基础知识)
+
+[构建界面-静态](#构建界面-静态)
+
+- [ArkTS基础快速入门](#ArkTS基础快速入门)
+- [ArkUI布局](#ArkUI布局)
+
+[构建应用-动态](#构建应用-动态)
+
 ## DevEco studio 快捷键
 
 | 快捷键 (Win)                | 快捷键 (Mac)      | 英文说明                       | 中文说明                                                     |
@@ -61,6 +72,8 @@
 | Ctrl + R         | ⌘ + R         | Replace...          | 文件内替换。（常用）                   |
 | Ctrl + Shift + R | Shift + ⌘ + R | Replace in Files... | 项目中替换。（常用）                   |
 | Shift + Shift    | Shift + Shift | Fast Find           | 快速查找（常用）                       |
+
+
 
 ## 开发基础知识
 
@@ -774,5 +787,971 @@ Stack({
         .backgroundColor(Color.Yellow)
         .zIndex(5)
     }
+```
+
+
+
+## 构建应用-动态
+
+### 字符串拼接
+
+把两个或多个字符串，拼成一个字符串。通常拼接的是字符串和变量，加号的作用：拼接。
+
+```ts
+// 字符串拼接 + 拼串
+let name: string = '吕布'
+let age: number = 18
+console.log('简介信息:', '姓名' + name)
+console.log('简介信息:', '年纪' + age)
+
+// 注意点: + 两边只要有字符串, 就是拼串的作用 (如果两边都是数字, 就是计算求和的作用)
+let num1: number = 100
+let num2: number = 200
+console.log('总数', num1 + num2)
+```
+
+### 模板字符串
+
+拼接字符串和变量，更适合于 多个变量 的字符串拼接。
+
+```ts
+// 模板字符串 `` (支持变量, 更利于字符串拼接)    普通字符串 ''  ""
+let str: string = `hello world`
+
+let name: string = '成小龙'
+let age: number = 18
+let hobby: string = '打拳'
+console.log('简介信息', `姓名: ${name}, 年纪: ${age}岁, 爱好: ${hobby}`)
+```
+
+### 类型转换（数字和字符串）
+
+**字符串转数字**
+
+Number()：字符串 直接转数字，转换失败返回NaN（字符串中包含非数字）
+
+parseInt()：去掉小数部分 转数字，转换失败返回NaN 
+
+parseFloat()：保留小数部分 转数字，转换失败返回NaN
+
+```ts
+let money: string = '10000'
+let money2: number = 500
+
+// + 的两端, 只要有字符串, 就是拼接
+// 需要是计算, 必须都是数字 => 将字符串类型, 转成数字
+// console.log('总工资', Number(money) + money2)
+
+let str1: string = '1.1'
+let str2: string = '1.9'
+let str3: string = '1.99a'
+let str4: string = 'a'
+
+// 转数字类型
+// 1. Number(变量) 原样转数字
+console.log('Number', Number(str1)) // 1.1
+console.log('Number', Number(str2)) // 1.9
+console.log('Number', Number(str3)) // NaN
+console.log('Number', Number(str4)) // NaN
+
+// 2. parseInt(变量) 去掉小数部分(取整)
+console.log('parseInt', parseInt(str1)) // 1
+console.log('parseInt', parseInt(str2)) // 1
+console.log('parseInt', parseInt(str3)) // 1
+console.log('parseInt', parseInt(str4)) // NaN
+
+// 3. parseFloat(变量) 保留小数部分
+console.log('parseFloat', parseFloat(str1)) // 1.1
+console.log('parseFloat', parseFloat(str2)) // 1.9
+console.log('parseFloat', parseFloat(str3)) // 1.99
+console.log('parseFloat', parseFloat(str4)) // NaN
+```
+
+ **数字转字符串**
+
+toString()：数字直接转字符串 
+
+toFixed()：四舍五入转字符串，可设置保留几位小数
+
+```ts
+// 数字通常用于计算, 字符串通常用于展示
+let money: number = 10000
+// 将数字转字符串, toString()  toFixed()
+// 1. 数据.toString() 原样转字符串
+console.log('toString:', money.toString())
+
+// 2. 数据.toFixed(保留几位小数)  四舍五入
+console.log('toFixed:', money.toFixed())
+console.log('toFixed:', money.toFixed(2))
+```
+
+### 交互 – 点击事件
+
+组件 被点击时 触发的事件，监听（感知）用户 点击行为，进行对应操作。语法：onClick( (参数) => {} )
+
+```ts
+@Entry
+@Component
+struct Index {
+  @State message: string = 'Hello World';
+
+  build() {
+    Row() {
+      Column() {
+        Button('点我,显示对话框')
+          .onClick(() => {
+            // console.log('消息:', '你好点击事件')
+            // 弹个框
+            AlertDialog.show({
+              message: '你好~ 这是个弹框'
+            })
+          })
+        Text('我是文本')
+          .onClick(() => {
+            // 弹个框
+            AlertDialog.show({
+              message: '你好~ 我是文本组件'
+            })
+          })
+      }
+      .width('100%')
+    }
+    .height('100%')
+  }
+}
+```
+
+### 状态管理
+
+之前构建的页面多为静态界面。 但如果希望构建一个动态的、有交互的界面，就需要引入“状态”的概念。
+
+普通变量：只能在初始化时渲染，后续将不会再刷新。 
+
+```ts
+let msg1: string = '黑马程序员'
+@Entry
+@Component
+struct Index {
+  msg2: string = '学鸿蒙,来黑马'
+  build() {
+    Column() {
+      Text(msg1)
+      Text(this.msg2)
+    }
+  }
+}
+```
+
+状态变量：需要装饰器装饰，改变会引起 UI 的渲染刷新 （必须设置 类型 和 初始值）。
+
+```ts
+@Entry
+@Component
+struct Index {
+  @State msg3: string = 'Hello World'
+  build() {
+    Column() {
+      Text(this.msg3).onClick(() => {
+        this.msg3 = '你好, 世界'
+      })
+    }
+  }
+}
+```
+
+注意：定义在 组件内 普通变量 或 状态变量，都需要 通过 this 访问
+
+```ts
+// 注意点:
+// 1. 普通变量, 只能在初始化时渲染, 后续变化了, 也不会引起更新
+// 2. 状态变量, 被装饰器修饰, 值的改变, 会 [自动] 引起 界面的刷新
+
+// 组件外的[普通变量] 不需要this即可访问
+let myName: string = '吕布'
+
+@Entry
+@Component
+struct Index {
+  // 组件内的[普通变量] this.xxx
+  myAge: number = 18
+
+  // 组件内的[状态变量] this.xxx
+  @State myMsg: string = 'hello 黑马'
+
+  build() {
+    Column() {
+      Text(myName).onClick(() => {
+        myName = '貂蝉'
+        console.log('myName', myName)
+      })
+      Text(this.myAge.toString()).onClick(() => {
+        this.myAge = 200
+        console.log('myAge', this.myAge)
+      })
+      Text(this.myMsg).onClick(() => {
+        this.myMsg = '你好 状态'
+      })
+    }
+  }
+}
+```
+
+### 运算符
+
+```ts
+// 算数运算符 + - * / %
+console.log('计算结果', 1 + 1)
+console.log('计算结果', 2 - 1)
+console.log('计算结果', 3 * 5)
+console.log('计算结果', 9 / 3)
+console.log('取余', 9 % 2) // 4余1
+console.log('取余', 9 % 5) // 1余4
+
+// 赋值运算符 =
+// +=  -=  *=  /=  %= (本质就是一个简写, 对变量本身进行计算, 计算完再赋值回来)
+// let num: number = 200
+// num *= 2 // num = num * 2
+// console.log('num', num)
+
+let num2: number = 199
+num2 %= 100 // num2 = num2 % 100
+console.log('num2', num2)
+```
+
+一元运算符
+
+```ts
+// 一元运算符(++  --)
+// ++ 作用: 让变量,在原本基础之上加1
+let num: number = 10
+// num++ // 先赋值,后自增
+// ++num // 先自增,后赋值
+console.log('num', num)
+
+let num1: number = 10
+let res1: number = num1++
+console.log('res1', res1) // 10
+console.log('num1', num1) // 11
+
+let num2: number = 10
+let res2: number = ++num2
+console.log('res2', res2) // 11
+console.log('num2', num2) // 11
+
+let num3: number = 10
+let res3: number = --num2
+console.log('res2', res3) // 9
+console.log('num2', num3) // 9
+```
+
+比较运算符
+
+```ts
+// 比较运算符 >  <   >=  <=   ==  !=
+let num1: number = 11
+let num2: number = 11
+console.log('判断结果', num1 > num2) // false
+console.log('判断结果', num1 < num2) // false
+console.log('判断结果', num1 >= num2) // true
+
+// == != 判断是否相等(判断数字, 也会用来判断字符串)
+let num1: number = 200
+let num2: number = 201
+console.log('判断结果', num1 == num2)
+
+// 判断密码是否正确
+let password: string = '123456'
+let password2: string = '123456'
+console.log('判断结果', password == password2)
+```
+
+逻辑运算符
+
+```ts
+// 逻辑运算符
+// 1. && (全真则真) 都得满足
+console.log('结果1', 3 > 5 && 5 < 9) // false
+console.log('结果2', 5 > 2 && 5 < 9) // true
+
+// 2. || (一真则真) 只要有一个满足即可
+console.log('结果1', 3 > 5 || 5 < 9) // true
+console.log('结果2', 5 > 2 || 5 < 9) // true
+console.log('结果3', 5 > 20 || 5 < 1) // false
+
+// 3. ! 取反
+console.log('结果', !true)
+```
+
+运算符优先级
+
+```ts
+// 运算符的优先级
+// 1. 小括号
+// 2. 一元  ++  --  !
+
+// 3. 算数  * / %   + -
+// 4. 比较  >  <   >=  <= ,  == !=
+
+// 5. 逻辑 && ||
+// 6. 赋值 =
+
+console.log('运算符优先级', 2 + 2 * 3) // 8
+console.log('运算符优先级', (2 + 2) * 3) // 12
+console.log('运算符优先级', 2 * 3 > 4 == false) // false
+console.log('运算符优先级', !true == 3 * 3 > 4) // false
+```
+
+### 数组的操作
+
+主要针对数组中的数据进行 查找、修改、增加 或 删除
+
+| 操作               | 语法                                                         |
+| ------------------ | ------------------------------------------------------------ |
+| 查找               | 数组名[下标]、数组名.length                                  |
+| 修改               | 数组名[下标] = 新值                                          |
+| 增加               | 数组名.push(数据1, 数据2, ...)、数组名.unshift(数据1, 数据2, ...) |
+| 删除               | 数组名.pop()、数组名.shift()                                 |
+| 任意位置增加或删除 | 数组名.splice(操作的起始位置, 删除的个数, 新增1, 新增2, ......) |
+
+#### 查找 & 修改
+
+查找: 数组名[下标]
+
+修改: 数组名[下标] = 新值 
+
+数组长度：数组名.length
+
+```ts
+// 1. 定义一个数组
+let names: string[] = ['刘小备', '吕小布', '张大飞']
+console.log('整个数组',names)
+
+// 2. 数组取值(通过下标)
+console.log('数组取值', names[1])
+console.log('数组长度', names.length)
+
+// 3. 数组修改(通过下标)
+names[2] = '赵云'
+console.log('修改数组', names)
+```
+
+#### 增加、删除数组元素
+
+往开头加: 数组名.unshift(数据1, 数据2, 数据3, ......) 
+
+结尾添加：数组名.push(数据1, 数据2, 数据3, ......)
+
+从开头删: 数组名.shift() 
+
+从结尾删: 数组名.pop()
+
+```ts
+// 定义一个数组
+let songs: string[] = ['告白气球', '洋葱', '吻别']
+
+// 添加
+// 1. 往开头新增 unshift(新增的值)  返回操作后的数组的长度
+songs.unshift('彩虹')
+console.log('返回数组长度', songs.unshift('七里香'))
+console.log('数组songs', songs)
+
+// 2. 往结尾新增 push(新增的值)  返回操作后的数组的长度
+songs.push('光辉岁月', '海阔天空')
+console.log('数组', songs)
+
+// 删除
+// 1. 从开头删 shift
+console.log('返回删除的项', songs.shift())
+console.log('返回删除的项', songs.shift())
+console.log('数组', songs)
+
+// 2. 从结尾删 pop
+songs.pop()
+songs.pop()
+songs.pop()
+console.log('数组', songs)
+
+// 开头(S): unshift(开头增)  shift(开头删)
+// 结尾(P): push(结尾增)  pop(结尾删)
+```
+
+#### 任意位置添加 / 删除数组元素
+
+语法：数组名.splice(起始位置, 删除的个数, 新增元素1, 新增元素2, ......)
+
+```ts
+// 定义一个数组
+let songs: string[] = ['告白气球', '洋葱', '吻别', '双节棍', '曹操']
+// splice 在任意位置进行删除或新增内容
+// 数组名.splice(操作的起始位置, 删除几个, 新增的项1, 新增的项2, ...)
+
+// 1. 删除(任意位置)
+songs.splice(2, 2)
+console.log('数组songs', songs)
+
+// 2. 新增(任意位置)
+songs.splice(1, 0, '彩虹') // 新增
+
+// 3. 替换(删了一项, 又加了一项)
+songs.splice(1, 1, '彩虹')
+console.log('数组songs', songs)
+```
+
+#### 遍历数组
+
+遍历：将数组里面的每个数据，按顺序访问一遍。
+
+**遍历数组 – for ... of**
+
+语法: for (let item of 数组名) {} 
+
+for ... of : 在 ... 之中 进行循环 
+
+item: 声明的一个变量, 用来在循环的时候接收 每一个数组元素
+
+```ts
+// 遍历数组: 利用循环, 依次按顺序访问数组的每一项
+let names: string[] = ['大强', '老莫', '小龙', '大黑', '小黄']
+
+// 数组的最后一项 names[names.length - 1]
+for (let i: number = 0; i < names.length; i++) {
+  console.log('名字是', names[i])
+}
+
+for (let item of names) {
+  console.log('数组中的每一项', item)
+}
+```
+
+
+
+### 语句
+
+语句： 一段可以执行的代码，是一个行为 ( num = a + b ) 
+
+表达式： 可以 被求值 的代码，并将其计算出 一个结果 （1 + 1、3 * 5、3 > 2）
+
+#### 分支语句
+
+```ts
+// 分支语句 - if 语句
+// 1. 单分支 (满足条件, 就会执行一段代码)
+// if (逻辑条件) {
+//   条件成立时执行的代码
+// }
+// 2. 双分支 (满足条件, 会执行A代码, 不满足条件, 会执行B代码)
+// if (逻辑条件) {
+//   条件成立时执行的代码
+// }
+// else {
+//   条件不成立时执行的代码
+// }
+
+let score: number = 92
+if (score >= 90) {
+  console.log('奖励', '一台游戏机')
+}
+else {
+  console.log('惩罚', '写个检讨, 分析出错原因')
+}
+
+
+let score: number = 35
+if (score >= 90) {
+  console.log('评价:', '优秀')
+}
+else if (score >= 80) {
+  console.log('评价:', '良好')
+}
+else if (score >= 60) {
+  console.log('评价:', '及格')
+}
+else {
+  console.log('评价:', '不及格')
+}
+```
+
+switch 分支
+
+switch 分支一般用于精确匹配，不同的值执行不同的代码
+
+```ts
+// 输入水果名称, 查询价格 (精确匹配)
+let fruit: string = '榴莲'
+
+switch (fruit) {
+  case '苹果':
+    console.log('苹果价格:', '2.8元一斤')
+    break
+  case '香蕉':
+    console.log('香蕉价格:', '5.5元一斤')
+    break
+  case '西瓜':
+    console.log('西瓜价格:', '1.5元一斤')
+    break
+  default:
+    console.log('提示:', '尊敬的用户, 该水果不存在')
+}
+```
+
+三元条件表达式
+
+语法：条件 ？条件成立执行的表达式 ：条件不成立执行的表达式
+
+```ts
+// 三元条件表达式
+// 语法: 条件 ? 条件成立执行的表达式 : 条件不成立执行的表达式
+
+let num1: number = 40
+let num2: number = 30
+
+// let max: number = num1 > num2 ? num1 : num2
+// console.log('三元条件表达式', max)
+
+let res: number = num1 > num2 ? 3 * 5 : 2 + 6
+console.log('三元条件表达式', res)
+```
+
+条件渲染
+
+条件渲染：使用 if、else 和 else if ，可基于 不同状态 渲染 对应不同 UI 内容。
+
+```ts
+@Entry
+@Component
+struct Index {
+  @State age: number = 15
+  build() {
+    // 条件渲染: 不同的条件, 控制不同的UI界面展示
+    Column() {
+      if (this.age < 18) {
+        Text('未成年, 18岁以下')
+      }
+      else if (this.age < 60) {
+        Text('成年人, 18~60岁')
+      }
+      else {
+        Text('老年人, 60+')
+      }
+      Button('长大').onClick(() => {
+        this.age += 5
+      })
+      Text(`当前年纪: ${this.age}`)
+    }
+  }
+}
+```
+
+#### 循环语句
+
+循环三要素 ：1. 初始值（变量） 2. 循环条件 3. 变化量（变量计数，自增或自减）
+
+while 语句 作用：重复执行指定的一段代码
+
+```ts
+// while循环: 可以重复的执行一段代码
+while (条件) {
+  需要循环执行的语句
+}
+
+// 死循环: 没有结束条件
+while (true) {
+  console.log('while', '重复执行的代码')
+}
+
+// 实际开发真正需要的, 有次数的循环
+// 三要素: 变量初始值; 判断条件; 变化量(变量要变)
+let i: number = 1
+while (i < 10) {
+  console.log('小于10成立', '执行代码', i) // 9
+  i++ // 10
+}
+
+// 需求1: 打印1-100的数字,  1, 2, 3, 4, 5 ... 100
+// 三要素: 变量起始值; 判断条件; 变化量;
+let i: number = 1
+while (i <= 100) {
+  console.log('i的值:', i)
+  i++
+}
+
+let i: number = 100
+while (i >= 1) {
+  console.log('i的值:', i)
+  i--
+}
+
+// 需求2: 打印 1-100 中的偶数
+let i: number = 1
+while (i <= 100) {
+  if (i % 2 === 0) {
+    console.log('i的值:', i)
+  }
+  i++
+}
+
+// 需求3: 计算 1-10 的数字的 累加和,  1 + 2 + 3 + 4 + 5 ... + 10
+// 三要素: 变量起始值; 判断条件; 变化量;
+let i: number = 1
+let sum: number = 0 // 存储累加的结果
+
+while (i <= 10) {
+  console.log('需要累加的数字:', i)
+  // 每次执行下面这行代码, 就会进行一次累加, 并且更新累加的结果
+  sum = sum + i
+  i++
+}
+console.log('累加结果:', sum)
+```
+
+for 语句
+
+```ts
+for (初始值; 循环条件; 变化量) {
+  重复执行的代码(循环体)
+}
+
+// 需求: 打印 1-10 →  从 1 开始, 循环到 10 结束
+for (let i: number = 1; i <= 10; i++) {
+  console.log('for循环', i)
+}
+
+
+// 1-10的和, 从1开始,循环到10
+let sum = 0
+for (let i: number = 1; i <= 10; i++) {
+  console.log('for', i)
+  sum = sum + i // sum += i
+}
+console.log('求和', sum)
+```
+
+退出循环
+
+作用：满足指定条件，可以退出循环 
+
+break：终止整个循环 
+
+continue： 退出当前一次循环的执行，继续执行下一次循环
+
+```ts
+// 退出循环:
+// 1. break: 终止整个循环 (后面的循环不执行了)
+// 2. continue: 退出当前这一次循环, 继续执行下一次循环 (包子当前这个不吃了, 吃下一个)
+
+// 1. 一共8个包子, 吃到第5个, 饱了
+for (let i: number = 1; i <= 8; i++) {
+  if (i == 5) {
+    console.log('拿起了第5个包子, 发现吃不动了')
+    // 终止当前的循环 (本次循环后面的代码不执行了, 且后续循环的代码也不执行了, 跳出循环)
+    break
+  }
+  console.log('吃包子:', `第${i}个`)
+}
+
+console.log('这是循环外的代码')
+
+
+// 2. 一个8个包子, 吃到第5个, 坏了
+for (let i: number = 1; i <= 8; i++) {
+  if (i == 5) {
+    console.log('拿起了第5个包子, 发现坏了')
+    // 当前这次循环不继续执行了, 继续执行下一次循环
+    continue
+  }
+  console.log('吃包子:', `第${i}个`)
+}
+
+console.log('这是循环外的代码')
+```
+
+
+
+### 对象数组
+
+对象
+
+```ts
+// 1. 定义接口
+interface Person {
+  stuId: number
+  name: string
+  gender: string
+  age: number
+}
+// 2. 基于接口构建对象
+let p1: Person = {
+  stuId: 1,
+  name: '小丽',
+  gender: '女',
+  age: 12
+}
+```
+
+对象数组
+
+```ts
+// 对象数组 => 数组中包裹存储了很多的对象
+// 1. 约定接口 (对象的类型)
+interface Student {
+  stuId: number
+  name: string
+  gender: string
+  age: number
+}
+
+// 2. 基于接口, 构建对象数组
+let stuArr: Student[] = [
+  { stuId: 1, name: '小丽', gender: '女', age: 12 },
+  { stuId: 2, name: '小红', gender: '女', age: 11 },
+  { stuId: 3, name: '大强', gender: '男', age: 12 },
+  { stuId: 4, name: '阿明', gender: '男', age: 13 },
+]
+// 包括对象的复杂数据,如果想要在日志中打印, 需要调用一个方法, 转成字符串格式
+// JSON.stringify(复杂类型)  对象/数组
+console.log('学生数组', JSON.stringify(stuArr))
+
+// 3. 具体使用 (访问 →  通过下标)
+console.log('小红', stuArr[1].name)
+console.log('小红', JSON.stringify(stuArr[1]))
+
+// 4. 也支持遍历 for... of, 普通for
+for (let item of stuArr) {
+  console.log('每一项', JSON.stringify(item))
+}
+```
+
+### ForEach-渲染控制
+
+ForEach 可以基于数组的个数，渲染组件的个数。（简化代码） 
+
+语法: ForEach(arr, (item, index) => {})
+
+```ts
+@Entry
+@Component
+struct Index {
+  @State titles:string[] = [
+    '电子产品',
+    '精品服饰',
+    '母婴产品',
+    '影音娱乐',
+    '海外旅游'
+  ]
+
+  build() {
+    Column() {
+      ForEach(this.titles, (item: string, index: number) => {
+        Text(`${index + 1} ${item}`)
+          .fontSize(24)
+          .fontWeight(700)
+          .fontColor(Color.Orange)
+          .padding(15)
+          .width('100%')
+      })
+    }
+  }
+}
+```
+
+### 阶段案例 – 生肖抽奖卡
+
+```ts
+// 定义接口 (每个列表项的数据结构)
+interface ImageCount {
+  url: string
+  count: number
+}
+
+// 0 1 2 3 4 5
+// [0,1) * 6  =>  [0,6)
+// 求随机数: Math.random
+// 向下取整: Math.floor
+// console.log('随机数', Math.floor(Math.random() * 6))
+
+@Entry
+@Component
+struct Index {
+  // 随机的生肖卡序号 0-5
+  @State randomIndex: number = -1 // 表示还没开始抽
+
+  // 基于接口, 准备数据
+  @State images: ImageCount[] = [
+    { url: 'app.media.bg_00', count: 0 },
+    { url: 'app.media.bg_01', count: 0 },
+    { url: 'app.media.bg_02', count: 0 },
+    { url: 'app.media.bg_03', count: 0 },
+    { url: 'app.media.bg_04', count: 0 },
+    { url: 'app.media.bg_05', count: 0 }
+  ]
+
+  // 控制遮罩的显隐
+  @State maskOpacity: number = 0 // 透明度
+  @State maskZIndex: number = -1 // 显示层级
+
+  // 控制图片的缩放
+  @State maskImgX: number = 0 // 水平缩放比
+  @State maskImgY: number = 0 // 垂直缩放比
+
+  // 控制中大奖遮罩的显隐
+  @State isGet: boolean = false
+
+  @State arr: string[] = ['pg', 'hw', 'xm'] // 奖池
+  @State prize: string = '' // 默认没中奖
+
+  build() {
+    Stack() {
+      // 初始化的布局结构
+      Column() {
+        Grid() {
+          ForEach(this.images, (item: ImageCount, index: number) => {
+            GridItem() {
+              Badge({
+                count: item.count,
+                position: BadgePosition.RightTop,
+                style: {
+                  fontSize: 14,
+                  badgeSize: 20,
+                  badgeColor: '#fa2a2d'
+                }
+              }) {
+                Image($r(item.url))
+                  .width(80)
+              }
+            }
+          })
+        }
+        .columnsTemplate('1fr 1fr 1fr')
+        .rowsTemplate('1fr 1fr')
+        .width('100%')
+        .height(300)
+        .margin({ top: 100 })
+
+        Button('立即抽卡')
+          .width(200)
+          .backgroundColor('#ed5b8c')
+          .margin({ top: 50 })
+          .onClick(() => {
+            // 点击时, 修改遮罩参数, 让遮罩显示
+            this.maskOpacity = 1
+            this.maskZIndex = 99
+            // 点击时, 图片需要缩放
+            this.maskImgX = 1
+            this.maskImgY = 1
+
+            // 计算随机数 Math.random()  [0,1) * (n + 1)
+            this.randomIndex = Math.floor(Math.random() * 6)
+          })
+      }
+      .width('100%')
+      .height('100%')
+
+      // 抽卡遮罩层 (弹层)
+      Column({ space: 30 }) {
+        Text('获得生肖卡')
+          .fontColor('#f5ebcf')
+          .fontSize(25)
+          .fontWeight(FontWeight.Bold)
+        Image($r(`app.media.img_0${this.randomIndex}`))
+          .width(200)
+            // 控制元素的缩放
+          .scale({
+            x: this.maskImgX,
+            y: this.maskImgY
+          })
+          .animation({
+            duration: 500
+          })
+        Button('开心收下')
+          .width(200)
+          .height(50)
+          .backgroundColor(Color.Transparent)
+          .border({ width: 2, color: '#fff9e0' })
+          .onClick(() => {
+            // 控制弹层显隐
+            this.maskOpacity = 0
+            this.maskZIndex = -1
+
+            // 图像重置缩放比为 0
+            this.maskImgX = 0
+            this.maskImgY = 0
+
+            // 开心收下, 对象数组的情况需要更新, 需要修改替换整个对象
+            // this.images[this.randomIndex].count++
+            this.images[this.randomIndex] = {
+              url: `app.media.img_0${this.randomIndex}`,
+              count: this.images[this.randomIndex].count + 1
+            }
+
+            // 每次收完卡片, 需要进行简单的检索, 判断是否集齐
+            // 需求: 判断数组项的count, 是否都大于0, 只要有一个等于0,就意味着没集齐
+            let flag: boolean = true // 假设集齐
+
+            // 验证是否集齐
+            for (let item of this.images) {
+              if (item.count == 0) {
+                flag = false // 没集齐
+                break // 后面的没必要判断了
+              }
+            }
+
+            this.isGet = flag
+
+            // 判断是否中奖了, 如果是 需要抽奖
+            if (flag) {
+              let randomIndex: number = Math.floor(Math.random() * 3)
+              this.prize = this.arr[randomIndex]
+            }
+          })
+      }
+      .justifyContent(FlexAlign.Center)
+      .width('100%')
+      .height('100%')
+      // 颜色十六进制色值,如果是八位,前两位,就是透明度
+      .backgroundColor('#cc000000')
+      // 设置透明度
+      .opacity(this.maskOpacity)
+      .zIndex(this.maskZIndex)
+      // 动画 animation, 当我们元素有状态的改变,可以添加animation做动画
+      .animation({
+        duration: 200
+      })
+
+      // 抽大奖的遮罩层
+      if (this.isGet) {
+        Column({ space: 30 }) {
+          Text('恭喜获得手机一部')
+            .fontColor('#f5ebcf')
+            .fontSize(25)
+            .fontWeight(700)
+          Image($r(`app.media.${this.prize}`))
+            .width(300)
+          Button('再来一次')
+            .width(200)
+            .height(50)
+            .backgroundColor(Color.Transparent)
+            .border({ width: 2, color: '#fff9e0' })
+            .onClick(() => {
+              this.isGet = false
+              this.prize = ''
+              this.images = [
+                { url: 'app.media.bg_00', count: 0 },
+                { url: 'app.media.bg_01', count: 0 },
+                { url: 'app.media.bg_02', count: 0 },
+                { url: 'app.media.bg_03', count: 0 },
+                { url: 'app.media.bg_04', count: 0 },
+                { url: 'app.media.bg_05', count: 0 }
+              ]
+            })
+        }
+        .justifyContent(FlexAlign.Center)
+        .width('100%')
+        .height('100%')
+        .backgroundColor('#cc000000')
+      }
+    }
+
+  }
+}
 ```
 

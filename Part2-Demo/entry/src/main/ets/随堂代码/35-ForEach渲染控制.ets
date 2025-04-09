@@ -11,13 +11,8 @@ struct Index {
 
   build() {
     Column() {
-      ForEach(this.titles, (item: string, index: number) => {
-        Text(`${index + 1} ${item}`)
-          .fontSize(24)
-          .fontWeight(700)
-          .fontColor(Color.Orange)
-          .padding(15)
-          .width('100%')
+      ForEach(this.titles,(item:string,index:number)=>{
+        Text(`${index}-${item}`)
       })
     }
   }
