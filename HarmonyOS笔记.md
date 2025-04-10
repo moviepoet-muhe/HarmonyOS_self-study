@@ -1,15 +1,6 @@
 # HarmonyOS笔记
 
-### 目录
 
-[开发基础知识](#开发基础知识)
-
-[构建界面-静态](#构建界面-静态)
-
-- [ArkTS基础快速入门](#ArkTS基础快速入门)
-- [ArkUI布局](#ArkUI布局)
-
-[构建应用-动态](#构建应用-动态)
 
 ## DevEco studio 快捷键
 
@@ -163,9 +154,49 @@ stage模型多工程情况下，共有的资源文件放到AppScope下的resourc
 
 ## 构建界面-静态
 
-### ArkTS基础快速入门
+### UI 范式基本语法
 
-ArkTS：是一门用于开发鸿蒙应用的编程语言。
+ArkTS基本组成
+
+![](https://alliance-communityfile-drcn.dbankcdn.com/FileServer/getFile/cmtyPub/011/111/111/0000000000011111111.20250408115819.40794821532392125077791295844679:50001231000000:2800:C58D7F28121CD977655543474A6856EAD9F640423E8B2EA8E9A65FE2A3AC27B9.png)
+
+- 装饰器： 用于装饰类、结构、方法以及变量，并赋予其特殊的含义。
+- UI描述：以声明式的方式来描述UI的结构（类似于模板语法的结构）
+- 自定义组件：使用 @Component 装饰的结构，可复用的UI单元，可组合其他组件。
+- 系统组件：ArkUI框架中默认内置的基础和容器组件，可直接被开发者调用。这类似于 html 中的基础标签，类似于小程序中提供的基础组件。
+- 属性方法：组件可以通过**链式调用**配置多项属性（类似于 css）。
+- 事件方法：组件可以通过链式调用设置多个事件的响应逻辑。
+
+### 组件通用信息
+
+不管是系统组件还是自定义组件都能够使用到的属性或事件
+
+[组件通用信息](https://developer.huawei.com/consumer/cn/doc/harmonyos-references/universal-component-information)
+
+### 声明式UI描述
+
+- 创建组件（带参、无参）
+- 配置属性（链式调用属性方法进行配置）
+- 配置事件（链式调用事件方法进行配置-注意事件方法中 this 的使用）
+- 子组件渲染（在尾随闭包中进行子组件的嵌套）
+
+### 渲染控制
+
+- 条件渲染: if-else
+
+- 循环(列表)渲染: ForEach(array, itemGenerator, keyGenerator?)
+
+  - 键值生成规则：ForEach的第三个参数就是用于描述键值生成规则的回调函数，这个函数是可选的，默认的键值生成规则为: `index + '__' + JSON.stringify(item)`。ForEach键值生成规则与 itemGenerator和keyGenerator的第二个参数index有关：
+
+  ![](https://alliance-communityfile-drcn.dbankcdn.com/FileServer/getFile/cmtyPub/011/111/111/0000000000011111111.20250408115837.14578376820516478937843264928506:50001231000000:2800:1EB81838B6AC6A51824CBCE25694A438EA0DDD35A802147F96B31132EC8E999A.png)
+
+### 状态管理
+
+- @State - 用于装饰组件（结构struct）内的成员变量，称为状态变量。一旦变量拥有了状态属性，就可以触发其直接绑定UI组件的刷新。当状态改变时，UI会发生对应的渲染改变。
+  - 注意，@State 装饰的变量并不是所有变化都能观察到，它只能观察到本身及第一层对象结构的变化，不能深层次观察到后代的变化。(对于普通对象，嵌套属性的赋值观察不到；对于数组，数组项中属性的赋值观察不到。)
+- $$ - 可为系统内置组件提供TS变量的引用，使得TS变量和系统内置组件的内部状态保持同步（双向绑定）。
+
+### ArkTS基础
 
 #### 数据类型
 
@@ -729,6 +760,67 @@ wrap 属性：Flex 是单行布局还是多行布局
 FlexWrap.NoWrap 单行布局 
 
 FlexWrap.Wrap 多行布局
+
+
+
+#### Grid 布局
+
+```ts
+@Entry
+@Component
+struct Index {
+  build() {
+    // Grid布局的基本使用: 规则的行列布局中非常常见, 3行4列
+    Grid() {
+      ForEach([1,2,3,4,5,6,7,8,9,10,11,12], () => {
+        GridItem() {
+          Column() {
+
+          }
+          .width('100%')
+          .height('100%')
+          .backgroundColor(Color.Green)
+          .border({ width: 1 })
+        }
+      })
+    }
+    .columnsTemplate('1fr 1fr 1fr 1fr')
+    .rowsTemplate('1fr 1fr 1fr')
+    .columnsGap(5)
+    .rowsGap(5)
+    .width('100%')
+    .height(500)
+    .backgroundColor(Color.Pink)
+  }
+}
+```
+
+
+
+#### Badge 组件
+
+```ts
+@Entry
+@Component
+struct Index {
+  build() {
+    Column() {
+      Badge({
+        count: 1,
+        position: BadgePosition.RightTop,
+        style: {
+          fontSize: 14,
+          badgeSize: 20,
+          badgeColor: '#fa2a2d'
+        }
+      }) {
+        Image($r('app.media.bg_01'))
+          .width(100)
+      }
+    }
+  }
+}
+```
 
 
 
@@ -1755,3 +1847,568 @@ struct Index {
 }
 ```
 
+## 组件化开发
+
+### 样式结构重用&常见组件
+
+#### Swiper 轮播组件
+
+Swiper是一个 容器组件，当设置了多个子组件后，可以对这些 子组件 进行轮播显示。（文字、图片...）
+
+```ts
+@Entry
+@Component
+struct Index {
+  build() {
+    Column() {
+      // Swiper 轮播组件的基本使用
+      // 1. Swiper 包内容
+      // 2. Swiper 设尺寸
+      Swiper() {
+        Text('1')
+          .backgroundColor(Color.Orange)
+        Text('2')
+          .backgroundColor(Color.Yellow)
+        Text('3')
+          .backgroundColor(Color.Brown)
+      }
+      .width('100%')
+      .height(200)
+      // 常用属性
+      .loop(true) // 开启循环
+      .autoPlay(true) // 自动播放
+      .interval(5000) // 自动播放间隔
+      .vertical(false) // 横向/纵向
+      // 定制小圆点
+      // .indicator(false)
+      .indicator(
+        Indicator.dot()
+          .itemWidth(20)
+          .itemHeight(20)
+          .color(Color.Black)
+          .selectedItemWidth(25)
+          .selectedItemHeight(25)
+          .selectedColor(Color.White)
+      )
+    }
+  }
+}
+```
+
+#### 样式&结构重用
+
+##### @Extend
+
+扩展组件（样式、事件）可以传递参数
+
+```ts
+// @Extend(组件名)
+// function 函数名 (参数, 参数2) {
+//
+// }
+
+@Extend(Text)
+function textFn () {
+  .fontSize(20)
+  .fontWeight(FontWeight.Bold)
+}
+
+@Extend(Text)
+function bannerItem (bgColor: ResourceColor, msg: string) {
+  .textAlign(TextAlign.Center)
+  .backgroundColor(bgColor)
+  .fontColor(Color.White)
+  .fontSize(30)
+  .onClick(() => {
+    AlertDialog.show({
+      message: msg
+    })
+  })
+}
+
+
+@Entry
+@Component
+struct Extends_demo {
+  @State message: string = '@Extend-扩展组件(样式,事件)';
+
+  build() {
+    Column() {
+      Text(this.message)
+        .textFn()
+
+      Swiper() {
+        Text('1')
+          .bannerItem(Color.Orange, '轮播图1号')
+        Text('2')
+          .bannerItem(Color.Brown, '轮播图2号')
+        Text('3')
+          .bannerItem(Color.Green, '轮播图3号')
+      }
+      .width('100%')
+      .height(160)
+    }
+    .width('100%')
+    .height('100%')
+  }
+}
+```
+
+
+
+##### @Styles
+
+抽取通用属性、事件，不可以传递参数
+
+```ts
+// 1. 全局定义
+@Styles function commonStyles () {
+  .width(100)
+  .height(100)
+}
+
+@Entry
+@Component
+struct StylesDemo {
+  @State message: string = '@styles';
+  @State bgColor: ResourceColor = Color.Gray
+
+  // 2. 组件内定义(才能通过this访问到自己的状态)
+  @Styles setBg() {
+    .backgroundColor(this.bgColor)
+    .onClick(() => {
+      this.bgColor = Color.Green
+    })
+  }
+
+  build() {
+    Column({ space: 10 }) {
+      Text(this.message)
+        .fontColor(Color.White)
+        .commonStyles()
+        .setBg()
+
+      Column() {}
+        .commonStyles()
+        .setBg()
+
+      Button('按钮')
+        .commonStyles()
+        .setBg()
+    }
+    .width('100%')
+    .height('100%')
+  }
+
+
+}
+```
+
+
+
+##### @Builder
+
+自定义构建函数（结构、样式、事件），可以传递参数
+
+```ts
+// 全局 Builder
+@Builder
+function navItem(icon: ResourceStr, txt: string) {
+  Column({ space: 10 }) {
+    Image(icon)
+      .width('80%')
+    Text(txt)
+  }
+  .width('25%')
+  .onClick(() => {
+    AlertDialog.show({
+      message: '点了' + txt
+    })
+  })
+}
+
+
+@Entry
+@Component
+struct BuilderDemo {
+  @State message: string = '@Builder';
+
+  @Builder
+  navItem(icon: ResourceStr, txt: string) {
+    Column({ space: 10 }) {
+      Image(icon)
+        .width('80%')
+      Text(txt)
+    }
+    .width('25%')
+    .onClick(() => {
+      AlertDialog.show({
+        message: '点了' + txt + this.message
+      })
+    })
+  }
+
+  build() {
+    Column({ space: 20 }) {
+      Text(this.message)
+        .fontSize(30)
+
+      Row() {
+        Row() {
+          navItem($r('app.media.ic_reuse_01'), '阿里拍卖')
+          navItem($r('app.media.ic_reuse_02'), '菜鸟')
+          this.navItem($r('app.media.ic_reuse_03'), '巴巴农场')
+          this.navItem($r('app.media.ic_reuse_04'), '阿里药房')
+        }
+      }
+    }
+    .width('100%')
+    .height('100%')
+  }
+
+}
+```
+
+#### 滚动容器 Scroll
+
+当子组件的布局尺寸 超过Scroll的尺寸 时，内容可以滚动
+
+##### 核心用法
+
+Scroll 设置尺寸
+
+设置溢出的子组件（只支持一个子组件）
+
+滚动方向（支持横向和纵向，默认纵向）
+
+```ts
+@Entry
+@Component
+struct Index {
+  build() {
+    Column() {
+      // 如果希望内容溢出, 能够滚动
+      Scroll() {
+        Column({ space: 10 }) {
+          ForEach(Array.from({ length: 10 }), (item: string, index) => {
+            Text('测试文本' + (index + 1))
+              .width('100%')
+              .height(100)
+              .textAlign(TextAlign.Center)
+              .backgroundColor(Color.Orange)
+              .fontSize(20)
+              .fontColor(Color.White)
+              .borderRadius(10)
+          })
+        }
+        .padding(10)
+        .width('100%')
+      }
+      .width('100%')
+      .height(400)
+      .scrollable(ScrollDirection.Vertical)
+    }
+  }
+}
+```
+
+##### Scroll常见属性
+
+| 名称           | 参数类型         | 描述                                                         |
+| -------------- | ---------------- | ------------------------------------------------------------ |
+| scrollable     | ScrollDirection  | 设置滚动方向。<br>ScrollDirection.Vertical 纵向<br>ScrollDirection.Horizontal 横向 |
+| scrollBar      | BarState         | 设置滚动条状态。                                             |
+| scrollBarColor | string           | number                                                       |
+| scrollBarWidth | string           | number                                                       |
+| edgeEffect     | value:EdgeEffect | 设置边缘滑动效果。<br>EdgeEffect.None 无<br>EdgeEffect.Spring 弹簧<br>EdgeEffect.Fade 阴影 |
+
+```ts
+@Entry
+@Component
+struct Index {
+  build() {
+    Column() {
+      // 如果希望内容溢出, 能够滚动
+      Scroll() {
+        Column({ space: 10 }) {
+          ForEach(Array.from({ length: 10 }), (item: string, index) => {
+            Text('测试文本' + (index + 1))
+              .width('100%')
+              .height(100)
+              .textAlign(TextAlign.Center)
+              .backgroundColor(Color.Orange)
+              .fontSize(20)
+              .fontColor(Color.White)
+              .borderRadius(10)
+          })
+        }
+        .padding(10)
+        .width('100%')
+      }
+      .width('100%')
+      .height(400)
+      .scrollable(ScrollDirection.Vertical) // 设置滚动方向
+      .scrollBar(BarState.Auto) // On一直显示 Off一直隐藏 Auto滑动显示
+      .scrollBarColor(Color.Blue) // 滚动条颜色
+      .scrollBarWidth(5) // 滚动条宽度
+      .edgeEffect(EdgeEffect.Spring) // 滑动效果
+    }
+  }
+}
+```
+
+##### Scroll控制器
+
+核心步骤： 
+
+1. 实例化 Scroller 的 控制器 
+2. 绑定给 Scroll 组件 
+3. 控制器的方法 控制滚动，控制器属性 获取滚动距离
+
+```ts
+@Entry
+@Component
+struct Index {
+  // 1. 创建 Scroller 对象 (实例化)
+  myScroll: Scroller = new Scroller()
+
+  build() {
+    Column() {
+      // 如果希望内容溢出, 能够滚动
+      // 2. 绑定给 Scroll 组件
+      Scroll(this.myScroll) {
+        Column({ space: 10 }) {
+          ForEach(Array.from({ length: 10 }), (item: string, index) => {
+            Text('测试文本' + (index + 1))
+              .width('100%')
+              .height(100)
+              .textAlign(TextAlign.Center)
+              .backgroundColor(Color.Orange)
+              .fontSize(20)
+              .fontColor(Color.White)
+              .borderRadius(10)
+          })
+        }
+        .padding(10)
+        .width('100%')
+      }
+      .width('100%')
+      .height(400)
+      .scrollable(ScrollDirection.Vertical) // 设置滚动方向
+      .scrollBar(BarState.Auto) // On一直显示 Off一直隐藏 Auto滑动显示
+      .scrollBarColor(Color.Blue) // 滚动条颜色
+      .scrollBarWidth(5) // 滚动条宽度
+      .edgeEffect(EdgeEffect.Spring) // 滑动效果
+
+      Button('控制滚动条位置').margin(20)
+        .onClick(() => {
+          this.myScroll.scrollEdge(Edge.End)
+        })
+      Button('获取已经滚动的距离')
+        .onClick(() => {
+          const y = this.myScroll.currentOffset().yOffset
+          AlertDialog.show({
+            message: `y: ${y}`
+          })
+        })
+    }
+  }
+}
+```
+
+##### Scroll 事件
+
+```ts
+@Entry
+@Component
+struct Index {
+  // 1. 创建 Scroller 对象 (实例化)
+  myScroll: Scroller = new Scroller()
+
+  build() {
+    Column() {
+      // 如果希望内容溢出, 能够滚动
+      // 2. 绑定给 Scroll 组件
+      Scroll(this.myScroll) {
+        Column({ space: 10 }) {
+          ForEach(Array.from({ length: 10 }), (item: string, index) => {
+            Text('测试文本' + (index + 1))
+              .width('100%')
+              .height(100)
+              .textAlign(TextAlign.Center)
+              .backgroundColor(Color.Orange)
+              .fontSize(20)
+              .fontColor(Color.White)
+              .borderRadius(10)
+          })
+        }
+        .padding(10)
+        .width('100%')
+      }
+      .width('100%')
+      .height(400)
+      .scrollable(ScrollDirection.Vertical) // 设置滚动方向
+      .scrollBar(BarState.Auto) // On一直显示 Off一直隐藏 Auto滑动显示
+      .scrollBarColor(Color.Blue) // 滚动条颜色
+      .scrollBarWidth(5) // 滚动条宽度
+      .edgeEffect(EdgeEffect.Spring) // 滑动效果
+      .onWillScroll((x, y) => {   
+        console.log('已经滑动的距离:', this.myScroll.currentOffset().yOffset)
+      })
+
+      Button('控制滚动条位置').margin(20)
+        .onClick(() => {
+          this.myScroll.scrollEdge(Edge.End)
+        })
+      Button('获取已经滚动的距离')
+        .onClick(() => {
+          const y = this.myScroll.currentOffset().yOffset
+          AlertDialog.show({
+            message: `y: ${y}`
+          })
+        })
+    }
+  }
+}
+```
+
+#### 容器组件 Tabs
+
+当页面内容较多时，可以通过Tabs组件进行 分类展示
+
+##### Tabs – 常用属性
+
+barPosition ：调整位置 开头 或 结尾 （参数）
+
+vertical ：调整导航 水平 或 垂直
+
+scrollable ：调整是否 手势滑动 切换
+
+animationDuration ：点击滑动动画时间
+
+```ts
+@Entry
+@Component
+struct Index {
+  build() {
+    Tabs({ barPosition: BarPosition.Start }) {
+      TabContent() {
+        Text('首页内容') // 有且只能一个子组件
+      }
+      .tabBar('首页') // 配置导航
+
+      TabContent() {
+        Text('推荐内容') // 有且只能一个子组件
+      }
+      .tabBar('推荐')
+
+      TabContent() {
+        Text('发现内容') // 有且只能一个子组件
+      }
+      .tabBar('发现')
+
+      TabContent() {
+        Text('我的内容') // 有且只能一个子组件
+      }
+      .tabBar('我的')
+    }
+    .vertical(false) // 垂直导航 true / 水平false
+    .scrollable(false)  // 允许滑动 true / 不允许 false
+    .animationDuration(0) // 切换动画的时间，毫秒
+  }
+}
+```
+
+##### 滚动导航栏
+
+如果导航栏的内容较多，屏幕无法容纳时，可以将他设置为滚动 可以通过 Tabs 组件的 barMode 属性即可调整 固定导航栏 或 滚动导航栏。
+
+```ts
+@Entry
+@Component
+struct Index {
+  titles: string[] = [
+    '首页','关注','热门','军事','体育',
+    '八卦','数码','财经','美食','旅行'
+  ]
+  build() {
+    // 生成10个面板 → 10个小导航
+    Tabs() {
+      ForEach(this.titles, (item: string, index) => {
+        TabContent() {
+          Text(`${item}内容`)
+        }
+        .tabBar(item)
+      })
+    }
+    // barMode属性, 可以实现滚动导航栏
+    .barMode(BarMode.Scrollable)
+    // .barMode(BarMode.Fixed)// 默认值
+  }
+}
+```
+
+##### 自定义TabBar-高亮切换
+
+TabBar 在底部，一般会显示 图形 和 文字，甚至有 特殊的图标。
+
+核心思路:
+
+1. 监听切换事件 → 得到索引值，记录高亮的索引 
+2. 给每个 tabBar起个标记，0，1，2 
+3. 在 tabBar 内部比较 标记 == 记录的索引 ? 高亮 : 不高亮
+
+| 名称                                             | 功能描述                                                     |
+| ------------------------------------------------ | ------------------------------------------------------------ |
+| onChange(event: (index: number) => void)         | Tab页签切换后触发的事件。 - index：当前显示的index索引，索引从0开始计算。 滑动切换、点击切换 均会触发 |
+| onTabBarClick(event: (index: number) => void)10+ | Tab页签点击后触发的事件。 - index：被点击的index索引，索引从0开始计算。 |
+
+```ts
+@Entry
+@Component
+struct Index {
+  // 准备状态, 存储激活的索引
+  @State selectedIndex: number = 0
+
+  @Builder
+  myBuilder (itemIndex: number, title: string, img: ResourceStr, selImg: ResourceStr) {
+    // 如果激活的是自己, 图片/文本 都需要调整样式 → 需要区分不同的 tabBar
+    Column() {
+      Image(itemIndex == this.selectedIndex ? selImg : img)
+        .width(30)
+      Text(title)
+        .fontColor(itemIndex == this.selectedIndex ? Color.Red : Color.Black)
+    }
+  }
+
+  build() {
+    Tabs({ barPosition: BarPosition.End }) {
+      TabContent() {
+        Text('购物车内容')
+      }
+      .tabBar(this.myBuilder(0, '购物车', $r('app.media.ic_tabbar_icon_2'), $r('app.media.ic_tabbar_icon_2_selected')))
+
+      TabContent() {
+        Text('我的内容')
+      }
+      .tabBar(this.myBuilder(1, '我的', $r('app.media.ic_tabbar_icon_3'), $r('app.media.ic_tabbar_icon_3_selected')))
+    }
+    .onChange((index: number) => {
+      // console.log('激活的索引', index)
+      this.selectedIndex = index
+    })
+    .animationDuration(0)
+    .scrollable(false)
+  }
+}
+```
+
+### ArkTS语法进阶
+
+#### class 类
+
+类是用于 创建对象 模板。同时类声明也会引入一个 新类型，可定义其 实例属性、方法 和 构造函数。
+
+##### 实例属性(字段)
+
+通过实例属性（字段），可以保存各种类型的数据
