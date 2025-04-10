@@ -180,21 +180,7 @@ ArkTS基本组成
 - 配置事件（链式调用事件方法进行配置-注意事件方法中 this 的使用）
 - 子组件渲染（在尾随闭包中进行子组件的嵌套）
 
-### 渲染控制
 
-- 条件渲染: if-else
-
-- 循环(列表)渲染: ForEach(array, itemGenerator, keyGenerator?)
-
-  - 键值生成规则：ForEach的第三个参数就是用于描述键值生成规则的回调函数，这个函数是可选的，默认的键值生成规则为: `index + '__' + JSON.stringify(item)`。ForEach键值生成规则与 itemGenerator和keyGenerator的第二个参数index有关：
-
-  ![](https://alliance-communityfile-drcn.dbankcdn.com/FileServer/getFile/cmtyPub/011/111/111/0000000000011111111.20250408115837.14578376820516478937843264928506:50001231000000:2800:1EB81838B6AC6A51824CBCE25694A438EA0DDD35A802147F96B31132EC8E999A.png)
-
-### 状态管理
-
-- @State - 用于装饰组件（结构struct）内的成员变量，称为状态变量。一旦变量拥有了状态属性，就可以触发其直接绑定UI组件的刷新。当状态改变时，UI会发生对应的渲染改变。
-  - 注意，@State 装饰的变量并不是所有变化都能观察到，它只能观察到本身及第一层对象结构的变化，不能深层次观察到后代的变化。(对于普通对象，嵌套属性的赋值观察不到；对于数组，数组项中属性的赋值观察不到。)
-- $$ - 可为系统内置组件提供TS变量的引用，使得TS变量和系统内置组件的内部状态保持同步（双向绑定）。
 
 ### ArkTS基础
 
@@ -1613,6 +1599,18 @@ for (let item of stuArr) {
 }
 ```
 
+### 渲染控制
+
+- 条件渲染: if-else
+
+- 循环(列表)渲染: ForEach(array, itemGenerator, keyGenerator?)
+
+  - 键值生成规则：ForEach的第三个参数就是用于描述键值生成规则的回调函数，这个函数是可选的，默认的键值生成规则为: `index + '__' + JSON.stringify(item)`。ForEach键值生成规则与 itemGenerator和keyGenerator的第二个参数index有关：
+
+  ![](https://alliance-communityfile-drcn.dbankcdn.com/FileServer/getFile/cmtyPub/011/111/111/0000000000011111111.20250408115837.14578376820516478937843264928506:50001231000000:2800:1EB81838B6AC6A51824CBCE25694A438EA0DDD35A802147F96B31132EC8E999A.png)
+
+
+
 ### ForEach-渲染控制
 
 ForEach 可以基于数组的个数，渲染组件的个数。（简化代码） 
@@ -2412,3 +2410,1015 @@ struct Index {
 ##### 实例属性(字段)
 
 通过实例属性（字段），可以保存各种类型的数据
+
+```ts
+// 类
+// class 类名 {
+//   字段名:类型 = 初始值
+//   字段名?:类型
+// }
+
+class Cat {
+  name: string = 'Tom'
+  foods?: string
+}
+// 基于类, 创建对象
+let p: Cat = new Cat()
+console.log('姓名:', p.name.length)
+
+p.foods = '小黄鱼'
+console.log('食物:', p.foods?.length)
+```
+
+##### 构造函数
+
+不同实例，将来需要有不同的字段初始值，就需要通过构造函数实现
+
+```ts
+// 构造函数语法
+class Food {
+  name: string
+  price: number
+  // 希望不同实例, 有不同的字段初始值 → 构造函数
+  constructor(name: string, price: number) {
+    this.name = name
+    this.price = price
+  }
+}
+let f1: Food = new Food('西兰花', 20)
+console.log('名称:', f1.name, '价格:', f1.price)
+
+let f2: Food = new Food('土豆炖鸡块', 28)
+console.log('名称:', f2.name, '价格:', f2.price)
+
+
+interface IFood {
+  name: string
+  price: number
+  desc: string
+}
+
+class Food {
+  name: string
+  price: number
+  desc: string
+  // 参数比较复杂，可以将参数基于一个接口合并到一个对象里面去，不用管参数顺序了   
+  constructor(paramsObj: IFood) {
+    this.name = paramsObj.name
+    this.price = paramsObj.price
+    this.desc = paramsObj.desc
+  }
+}
+let p1: Food = new Food({
+  name: '西兰花',
+  desc: '好吃',
+  price: 20
+})
+let p2: Food = new Food({
+  name: '黄瓜炒鸡蛋',
+  desc: '清爽',
+  price: 12
+})
+console.log('名称', p1.name)
+console.log('名称', p2.name)
+```
+
+##### 定义方法
+
+类中可以定义方法，并且在内部编写逻辑。
+
+```ts
+// 类 → 定方法
+class Person {
+  name: string
+  age: number
+
+  constructor(name: string, age: number) {
+    this.name = name
+    this.age = age
+  }
+  // 跟xxx打招呼, 还要自我介绍
+  sayHi(yourName: string) {
+    // 通过this可以访问到创建出来的实例对象
+    console.log(`hello, ${yourName}, 我是${this.name}`)
+  }
+  sing(): string {
+    return '稻香'
+  }
+}
+let p1:Person = new Person('凹凸曼', 18)
+p1.sayHi('小怪兽')
+
+let p2:Person = new Person('大灰狼', 5)
+p2.sayHi('小绵羊')
+```
+
+##### 静态属性 和 静态方法
+
+类还可以添加 静态属性、方法，后续访问需要通过 类 来完成
+
+```ts
+// 静态属性 和 静态方法
+class Robot {
+  static version: string = 'v2.0'
+  static getRandom(): number {
+    return Math.random()
+  }
+}
+console.log('Robot类的版本', Robot.version)
+console.log('工具方法:', Robot.getRandom())
+```
+
+##### 继承 extends 和 super 关键字
+
+类可以通过 继承 快速获取另外一个类的 字段 和 方法。
+
+子类通过 super 可以访问父类的实例字段、实例方法和构造函数。
+
+```ts
+// 父类   子类
+// 人类   学生, 老师, 工人
+class Person {
+  name: string
+  age: number
+
+  constructor(name: string, age: number) {
+    this.name = name
+    this.age = age
+  }
+
+  sayHi() {
+    console.log('大家好~', this.name, this.age)
+  }
+}
+---------------------------------------------------
+class Student extends Person {
+  grade: string
+
+  constructor(name: string, age: number, grade: string) {
+    // 父类中的构造函数, 此时需要我们手动调用  super() 构造函数, super.方法名(), super.属性名
+    super(name, age)
+    // 完成自己属性的初始化
+    this.grade = grade
+  }
+
+  study () {
+    console.log('我是学生, 我爱学习~')
+  }
+  // 子类中想要重写父类中的方法, 只需提供同名的方法即可
+  sayHi(): void {
+    super.name // 获取父类的属性
+    super.age // 获取父类的属性
+    super.sayHi() // 调用了父类的方法
+    console.log('hello, nice to meet you'); // 扩展了自己的特性
+  }
+}
+let s1: Student = new Student('小明', 18, '五年级')
+s1.sayHi() // 调用重写的sayHi方法
+
+s1.study() // 调用自己的study方法
+console.log(s1.grade) // 访问自己的grade属性
+
+let s2: Student = new Student('小蓝', 18, '三年级')
+console.log(s2.grade)
+------------------------------------
+class Teacher extends Person {
+}
+let t1: Teacher = new Teacher('李老师', 35)
+t1.sayHi() // 调用父类的sayHi方法
+--------------------------------------
+class Worker extends Person {
+}
+```
+
+##### instanceof
+
+instanceof 运算符可以用来检测某个对象是否是某个类的实例
+
+```ts
+console.log(typeof 111)
+console.log(typeof true)
+console.log(typeof 'abc')
+
+// typeof 仅能用于判断简单类型, 复杂类型需要用instanceof判断
+class Person {}
+class Student {}
+let p: Person = new Person()
+let s: Student = new Student()
+console.log(typeof p)
+console.log(typeof s)
+
+
+class Person {}
+class Student extends Person {}
+class Worker extends Person {}
+
+let s: Student = new Student()
+console.log('判断结果:', s instanceof Student)
+console.log('判断结果:', s instanceof Person)
+console.log('判断结果:', s instanceof Worker)
+
+interface IObj {}
+// 判断一个变量是否存的是数组
+let temp: IObj = {}
+console.log('是否是数组', temp instanceof Array)
+```
+
+##### 修饰符 - readonly
+
+类的 方法 和 属性 可以通过修饰符来 限制 访问 修饰符包括：readonly、private、protected 和 public。省略不写默认为 public。
+
+readonly只可以取值，无法修改
+
+```ts
+// 修饰符 readonly
+class Cat {
+  name: string
+  age: number
+  readonly legs: number = 4
+  constructor(name: string, age: number) {
+    this.name = name
+    this.age = age
+  }
+}
+let c1 = new Cat('小花', 2)
+c1.name = '小美'
+// c1.legs = 6 // 不能修改
+console.log('姓名:', c1.name)
+
+// 3.1415926 圆周率
+// Math.PI
+```
+
+##### 修饰符 - private
+
+private 修饰的成员不能在声明该成员的类之外访问, 包括子类
+
+```ts
+class Person {
+  private name: string = ''
+  private age: number = 0
+  desc: string = '描述'
+}
+let p = new Person()
+console.log('实例访问:', p.name) // 无法再外部访问私有数据
+
+class Student extends Person {
+  sayHi () {
+    console.log('访问私有的数据:', super.name) // 私有数据无法再(子类)访问
+  }
+}
+```
+
+##### 修饰符 - protected
+
+protected修饰符的作用与private修饰符非常相似 不同点是protected修饰的成员允许在 派生类(子类) 中访问。
+
+##### 修饰符 - public
+
+public 修饰的类成员（字段、方法、构造函数） 在程序的任何可访问该类的地方都是可见的 (默认)。
+
+```ts
+class Person {
+  protected name: string
+  protected age: number
+  desc: string = '描述'
+  // 类的内容, 无论是私有还是保护, 都是可以访问的
+  constructor(name: string, age: number) {
+    this.name = name
+    this.age = age
+  }
+}
+let p = new Person('小王', 18)
+// console.log('实例访问:', p.name) // 无法在外部, 访问受保护的数据
+
+class Student extends Person {
+  sayHi () {
+    console.log('访问私有的数据:', super.name) // 保护的数据可以在子类访问
+  }
+}
+```
+
+| 修饰符名  | 作用 | 访问限制         |
+| --------- | ---- | ---------------- |
+| readonly  | 只读 | 无限制           |
+| private   | 私有 | 类内部可以访问   |
+| protected | 保护 | 类及子类可以访问 |
+| public    | 公共 | 无限制           |
+
+#### 剩余参数 和 展开运算符
+
+剩余参数的语法，我们可以将 函数 或 方法 中一个不定数量的参数表示为一个数组。
+
+出于程序稳定性，以及运行性能考虑，在 ArkTS 中 ...(展开运算符) 只能用在数组上。
+
+```ts
+// ...数组名  => 可以收集剩余的参数
+function sum (n1: number, n2: number, ...argsArr: number[]) {
+  let total: number = n1 + n2
+  // 遍历剩余参数, 如果有剩余的参数, 就继续累加
+  for (let temp of argsArr) {
+    total += temp
+  }
+  console.log('结果', total)
+  return total
+}
+sum(1, 2)
+sum(1, 2, 3, 4)
+sum(1, 2, 3, 4, 5, 6)
+
+// ... 展开运算符, 用于数组的平铺合并
+let arr1: number[] = [1,2,3]
+let arr2: number[] = [4,5,6]
+let newArr: number[] = [...arr1, ...arr2]
+console.log('最终的数组', newArr)
+```
+
+#### 接口继承与实现
+
+接口继承使用的关键字是 extends
+
+```ts
+interface IAnimal {
+  name: string
+  age: number
+}
+interface ICat extends IAnimal {
+  hair: string
+}
+interface IDog extends IAnimal {
+  color: string
+}
+let dog1: IDog = {
+  name: '小泰迪',
+  age: 2,
+  color: '棕色'
+}
+```
+
+**接口实现**
+
+可以通过接口结合 implements 来限制 类 必须要有 某些属性 和 方法。
+
+```ts
+// 接口实现: 定义一个接口, 约束类 => 类需要按照接口的要求, 实现类的主体
+interface IDog {
+  name: string
+  age: number
+  jump: () => void
+}
+
+// 基于接口, 实现类
+class Dog implements IDog {
+  name: string
+  age: number
+  desc: string
+
+  constructor(name: string, age: number, desc: string) {
+    this.name = name
+    this.age = age
+    this.desc = desc
+  }
+
+  jump() {
+
+  }
+}
+let dog: Dog = new Dog('小飞', 2, '是一只非常帅气的二哈')
+dog.jump()
+
+function 函数名<Type>(temp:Type):Type{
+  return temp
+}
+```
+
+#### 泛型
+
+##### 泛型函数
+
+泛型可以让【函数】等， 与多种【不同的类型】一起工作，灵活可复用 通俗一点就是：类型是 可变 的!
+
+```ts
+// 泛型: 广泛的类型 => 类型可以作为参数传递过来, 类型是[可变]的
+// function 函数名<Type> (形参: Type): Type {
+//   return 形参
+// }
+
+// 封装了一个函数: 传入什么样的参数, 就立刻返回什么样的参数
+function fn<T> (param: T) : T {
+  return param
+}
+fn<string>('abc')
+fn<number>(123)
+fn<boolean>(true)
+fn<number[]>([1, 2, 3, 4, 5])
+
+// 会默认根据传参, 进行类型推断, 动态的配置 T 类型参数 的值
+fn(true)
+fn([1, 2, 3, 4, 5])
+
+// 练习1: 定义函数, 参数是数组(存的类型不定), 返回数组的长度
+function getLength<T> (arr: T[]) : number {
+  return arr.length
+}
+console.log('', getLength<number>([1, 2, 3]))
+console.log('', getLength<string>(['1', 'aa', 'bb', 'cc']))
+
+// 练习2: 定义函数, 参数是数组(存的类型不定), 返回数组的最后一项
+function getLast<T> (arr: T[]) : T {
+  return arr[arr.length - 1]
+}
+console.log('', getLast<number>([1, 2, 3, 4, 99]))
+console.log('', getLast<string>(['a', 'b', 'c']))
+```
+
+##### 泛型约束
+
+之前的类型参数，可以传递任何类型，没有限制。 如果希望有限制 → 泛型约束
+
+```ts
+// 泛型约束: 给传递的类型参数, 添加限制
+interface ILength {
+  length: number
+}
+function fn<T extends ILength>(param: T) {
+  console.log('', param.length)
+}
+
+fn<string>('abc')
+fn<number[]>([1, 2, 3])
+
+class Desk {
+  length = 2
+}
+let d = new Desk()
+fn<Desk>(d)
+```
+
+##### 多个泛型参数
+
+日常开发的时候，如果有需要，可以添加多个 类型变量
+
+```ts
+// 多个泛型变量 => 传递多个类型参数
+function fn<T1, T2> (param1: T1, param2: T2) {
+  console.log('参数1', param1)
+  console.log('参数2', param2)
+}
+fn<string, boolean>('abc', true)
+fn<number, string>(123, 'abc')
+fn<string[], number[]>(['a', 'b'], [1, 2])
+```
+
+##### 泛型接口
+
+定义接口的时候，结合泛型定义，就是泛型接口。
+
+```ts
+// 泛型接口
+interface IdFunc<T> {
+  // 约定有两个方法 (id类型不定, string number)
+  // 1. 传入 id 值, 就返回 id 值
+  // 2. 返回一个 ids 数组
+  id: (value: T) => T
+  ids: () => T[]
+}
+
+let obj: IdFunc<number> = {
+  id(value: number) {
+    return value
+  },
+  ids() {
+    return [1, 2, 3]
+  }
+}
+
+let obj2: IdFunc<string> = {
+  id(value: string) {
+    return value
+  },
+  ids() {
+    return ['001', '002', '003']
+  }
+}
+```
+
+##### 泛型类
+
+定义类的时候，结合泛型定义，就是泛型类。
+
+```ts
+// 泛型类: 定义类的时候, 配合泛型一起定义
+class Person <T>{
+  id: T
+  constructor(id: T) {
+    this.id = id
+  }
+  getId (): T {
+    return this.id
+  }
+}
+let p: Person<number> = new Person<number>(10)
+let p2: Person<string> = new Person<string>('abc')
+```
+
+### 自定义组件-组件通信
+
+#### 模块化语法
+
+**模块化基本认知**
+
+模块化：把一个大的程序，【拆分】成若干的小的模块，通过【特定的语法】，可以进行任意组合 模块化基本认知 ArkTS 中每个 ets 文件，都可以看做是一个模块。
+
+**默认导出和导入**
+
+默认导出：指一个模块，只能默认导出的 一个值 或 对象。使用时，可以 自定义 导入名称。 
+
+使用步骤： 
+
+1. 当前模块中 导出模块 
+2. 需要使用的地方 导入模块
+
+**按需导出和导入**
+
+按需导出：指一个模块，可以按照需要，导出多个特性。
+
+**全部导入**
+
+将所有的按需导入，全部导入进来 → 导出部分不需要调整，调整导入的语法即可。
+
+```ts
+// 路径: 查找文件时, 从起点到终点的路线
+// 相对路径: 从当前文件出发查找目标文件
+// → 找上一级 ../
+// → 同级目录 ./
+
+// 1. 默认导入
+import result from '../tools/module1'
+import fn from './module2'
+console.log('module1中的数据', JSON.stringify(result))
+fn()
+
+// 2. 按需导入
+import { name1, price, sayHi as sayHello } from '../tools/module3'
+console.log('module3中的数据', name1, price)
+sayHello()
+
+// 3. 全部导入
+import * as Module3 from '../tools/module3'
+console.log('全部的数据', Module3.name1)
+console.log('全部的数据', Module3.price2)
+Module3.sayHi()
+```
+
+#### 自定义组件 - 基础
+
+##### 基本使用
+
+概念：由框架直接提供的称为 系统组件，由开发者定义的称为 自定义组件。
+
+```ts
+@Component
+struct MyCom {
+  @State count: number = 1
+  build() {
+    Row() {
+      Text(this.count.toString())
+        .fontColor(Color.White)
+        .margin(10)
+      Button('按钮')
+        .onClick(() => {
+          this.count++
+        })
+    }
+  }
+}
+
+@Component
+struct MyHeader {
+  build() {
+    Row() {
+      Text('我是头部')
+        .fontColor(Color.White)
+    }
+      .width('100%')
+      .height(50)
+      .backgroundColor(Color.Brown)
+  }
+}
+
+@Component
+struct MyMain {
+  build() {
+    Column() {
+      // 将相同的业务逻辑, 封装成一个通用的组件
+      MyCom()
+      MyCom()
+      MyCom()
+    }
+    .layoutWeight(1)
+    .width('100%')
+    .backgroundColor(Color.Gray)
+  }
+}
+
+@Component
+struct MyFooter {
+  build() {
+    Row() {
+      Text('我是底部')
+    }
+    .width('100%')
+    .height(50)
+    .backgroundColor(Color.Green)
+  }
+}
+
+@Entry
+@Component
+struct Index {
+  build() {
+    Column() {
+      MyHeader()
+      MyMain()
+      MyFooter()
+    }
+  }
+}
+```
+
+##### 通用样式事件
+
+自定义组件可以通过点语法，设置 通用样式, 通用事件 如果想要单独预览组件，可以使用 @Preview 进行装饰。
+
+```ts
+@Preview
+@Component
+export struct HelloCom {
+  build() {
+    Row() {
+      Text('自定义组件')
+      Button('按钮')
+    }
+    .width(200)
+    .height(50)
+    .backgroundColor(Color.Orange)
+  }
+}
+```
+
+```ts
+import { HelloCom } from '../components/HelloCom'
+
+@Entry
+@Component
+struct Index {
+  build() {
+    Column() {
+      HelloCom()
+        .width(250)
+        .height(60)
+        .backgroundColor(Color.Gray)
+        .onClick(() => {
+          AlertDialog.show({
+            message: '测试点击'
+          })
+        })
+    }
+  }
+}
+```
+
+##### 成员函数变量
+
+除了必须要实现 build() 函数外，还可以定义其他的成员函数，以及成员变量。 成员变量的值 → 外部可传参覆盖。
+
+```ts
+@Component
+struct MyPanel {
+  // 成员变量 - 数据
+  title: string = '默认的大标题'
+  extra: string = '查看更多 >'
+  // 成员变量 - 函数 - 可以外部传入覆盖的
+  getMore = () => {
+    AlertDialog.show({
+      message: '查看更多'
+    })
+  }
+
+  // 成员函数 - 不可以外部传入覆盖
+  sayHi() {
+    AlertDialog.show({
+      message: '打招呼, 你好'
+    })
+  }
+
+  build() {
+    Column() {
+      Row() {
+        Text(this.title).fontSize(18)
+        Text(this.extra).fontSize(18)
+          .onClick(() => {
+            this.getMore()
+          })
+      }
+      .width('100%')
+      .justifyContent(FlexAlign.SpaceBetween)
+      Row() {
+        Text('内容部分').fontSize(18)
+        Button('按钮')
+          .onClick(() => {
+            this.sayHi()
+          })
+      }
+      .padding(20)
+    }
+    .padding(10)
+    .width('100%')
+    .height(200)
+    .margin({ bottom: 20 })
+    .borderRadius(10)
+    .backgroundColor(Color.White)
+  }
+}
+
+@Entry
+@Component
+struct Index {
+  build() {
+    Column() {
+      MyPanel({
+        title: '我的订单',
+        extra: '全部订单 > ',
+        getMore() {
+          AlertDialog.show({
+            message: '点击了全部订单'
+          })
+        }
+      })
+      MyPanel({
+        title: '小米有品重酬',
+        extra: '7款重酬中 >',
+        getMore() {
+          AlertDialog.show({
+            message: '查看7款重酬'
+          })
+        }
+      })
+    }
+    .width('100%')
+    .height('100%')
+    .backgroundColor('#ccc')
+    .padding(20)
+  }
+}
+```
+
+##### @BuilderParam 传递UI
+
+利用 @BuilderParam 构建函数，可以让自定义组件 允许外部传递 UI。
+
+```ts
+@Component
+struct SonCom {
+  // 1. 定义构建函数 BuilderParam 接受外部传入的 ui, 并设置默认值
+  @BuilderParam ContentBuilder: () => void = this.defaultBuilder
+  // 默认 的 Builder 
+  @Builder
+  defaultBuilder () {
+    Text('默认的内容')
+  }
+  build() {
+    // 2. 使用构建函数, 构建结构 。使用 @BuilderParam 装饰的成员变量
+    Column() {
+      this.ContentBuilder()
+    }
+  }
+}
+
+@Entry
+@Component
+struct Index {
+  build() {
+    Column() {
+      SonCom() {
+          // 直接传递进来(尾随闭包)
+        Button('传入的结构')
+      }
+    }
+  }
+}
+```
+
+##### 多个 @BuilderParam 参数
+
+子组件有多个BuilderParam，必须通过参数的方式来传入。
+
+```ts
+@Component
+struct MyCard {
+    // 由外部传入 UI
+  @BuilderParam tBuilder: () => void = this.tDefaultBuilder
+  @BuilderParam cBuilder: () => void = this.cDefaultBuilder
+ 	// 设置默认 Builder
+  @Builder tDefaultBuilder () {
+    Text('我是默认的大标题')
+  }
+  @Builder cDefaultBuilder () {
+    Text('我是默认的内容')
+  }
+
+  build() {
+    // 卡片组件
+    Column() {
+      // 标题部分
+      Row() {
+        this.tBuilder()
+      }
+      .height(30)
+      .width('100%')
+      .border({ color: '#ccc', width: { bottom: 1 }})
+      .padding({ left: 10 })
+      // 内容部分
+      Row() {
+        this.cBuilder()
+      }
+      .width('100%')
+      .padding(10)
+    }
+    .width('100%')
+    .height(100)
+    .backgroundColor(Color.White)
+    .borderRadius(10)
+    .justifyContent(FlexAlign.Start)
+  }
+}
+
+
+@Entry
+@Component
+struct Index {
+  @Builder ftBuilder () {
+    Text('我是传入的大标题结构')
+  }
+  @Builder fcBuilder () {
+    Text('我是内容部分')
+    Text('我是内容部分')
+    Text('我是内容部分')
+  }
+
+  build() {
+    Column({ space: 10 }) {
+      MyCard()
+      MyCard({
+        tBuilder: this.ftBuilder,
+        cBuilder: this.fcBuilder
+      })
+    }
+    .width('100%')
+    .height('100%')
+    .padding(20)
+    .backgroundColor('#ccc')
+  }
+}
+```
+
+#### 状态管理
+
+当运行时的 状态变量 变化，带来UI的重新渲染，在ArkUI中统称为 状态管理机制。
+
+变量必须被 装饰器 装饰才可以成为状态变量。
+
+@State - 用于装饰组件（结构struct）内的成员变量，称为状态变量。一旦变量拥有了状态属性，就可以触发其直接绑定UI组件的刷新。当状态改变时，UI会发生对应的渲染改变。
+
+- 注意，@State 装饰的变量并不是所有变化都能观察到，它只能观察到本身及第一层对象结构的变化，不能深层次观察到后代的变化。(对于普通对象，嵌套属性的赋值观察不到；对于数组，数组项中属性的赋值观察不到。)
+
+$$ - 可为系统内置组件提供TS变量的引用，使得TS变量和系统内置组件的内部状态保持同步（双向绑定）。
+
+##### @State 自己的状态
+
+注意：不是状态变量的所有更改都会引起刷新。只有可以被框架观察到的修改才会引起UI刷新。
+
+- boolean、string、number类型时，可以观察到数值的变化 
+- class或者Object时，可观察 自身的赋值 的变化， 第一层属性赋值的变化，即Object.keys(observedObject) 返回的属性。
+
+```ts
+interface Car {
+  name: string
+}
+interface Person {
+  name: string
+  car: Car
+}
+
+const obj: Person = {
+  name: 'zs',
+  car: {
+    name: '小黄车'
+  }
+}
+console.log('查看第一层属性', Object.keys(obj))
+
+@Entry
+@Component
+struct Index {
+  // 状态变量
+  // 1. string number boolean 可以直接监视到变化
+  @State message: string = 'hello world'
+  // 2. 复杂类型 object class, 第一层随便改, 嵌套需要进行整个嵌套对象的替换
+  @State person: Person = {
+    name: 'jack',
+    car: {
+      name: '宝马车'
+    }
+  }
+  build() {
+    Column() {
+      Text(this.message).fontSize(20)
+      Button('改message').onClick(() => {
+        this.message = '你好'
+      })
+      Text(JSON.stringify(this.person))
+      Button('改person').onClick(() => {
+        // this.person = {
+        //   name: 'amy',
+        //   car: {
+        //     name: '保时捷'
+        //   }
+        // }
+
+        // this.person.name = 'tony'
+
+        // 如果不是对象的第一层属性, 修改时, 需要修改整个嵌套的对象
+        // this.person.car.name = '小火车'
+
+        // console.log('car name', this.person.car.name)
+        this.person.car = {
+          name: '老爷车'
+        }
+      })
+    }
+  }
+}
+```
+
+##### @Prop - 父子单向
+
+@Prop 装饰的变量可以和父组件建立单向的同步关系。 
+
+@Prop 装饰的变量是可变的，但是变化不会同步回其父组件
+
+```ts
+@Component
+struct SonCom {
+  // 保证父组件的数据变化了, 能够往下响应式的更新
+  @Prop sCar: string = ''
+  changeCar = (newCar: string) => {}
+
+  build() {
+    Column() {
+      Text(`子组件 ${this.sCar}`)
+      Button('换车').onClick((event: ClickEvent) => {
+        // 1. prop传值 → 单向传递
+        // 子组件, 可以修改到 prop 传值, 但是修改的更新不会同步到父组件
+        // 通常不太会直接修改 prop 传值, 父组件的状态一旦变化, 会自动向下同步
+        // 修改就被覆盖了
+        // this.sCar = '小黄车'
+
+        // 2. 如果实在想更新, 希望保证父子同步 => 调用父组件传递过来的方法
+        // 如果没有写箭头函数, 意味着, this 指向 调用者, 而此处执行环境 this → 子组件
+        this.changeCar('蹦蹦车')
+      })
+    }
+    .padding(20)
+    .backgroundColor(Color.Orange)
+  }
+}
+
+@Entry
+@Component
+struct FatherCom {
+  @State fCar:string = '劳斯莱斯'
+  build() {
+    Column() {
+      Text(`父组件 - ${this.fCar}`)
+      Button('换车').onClick(() => {
+        this.fCar = '三轮车'
+      })
+
+      SonCom({
+        sCar: this.fCar,
+        // 这里必须要用箭头函数, 否则会有 this 指向的问题
+        // 使用箭头函数的好处, 可以使用外部环境的 this, 不受传递过去后的执行环境影响
+        // 希望此处 this 指向 父组件
+        changeCar: (newCar: string) => {
+          this.fCar = newCar
+        }
+      })
+    }
+    .padding(50)
+    .backgroundColor(Color.Pink)
+  }
+}
+```
+

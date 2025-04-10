@@ -4,18 +4,23 @@
 // → 同级目录 ./
 
 // 1. 默认导入
-// import result from '../tools/module1'
-// import fn from './module2'
-// console.log('module1中的数据', JSON.stringify(result))
-// fn()
-
+import result from '../tools/module1'
+import fn from './module2'
 // 2. 按需导入
-// import { name1, price, sayHi as sayHello } from '../tools/module3'
-// console.log('module3中的数据', name1, price)
-// sayHello()
-
 // 3. 全部导入
 import * as Module3 from '../tools/module3'
+import { name1, price, sayHi as sayHello } from '../tools/module3'
+
+console.log('module1中的数据', JSON.stringify(result))
+fn()
+
+
+
+console.log('module3中的数据', name1, price)
+sayHello()
+
+
+
 console.log('全部的数据', Module3.name1)
 console.log('全部的数据', Module3.price2)
 Module3.sayHi()
@@ -24,6 +29,6 @@ Module3.sayHi()
 @Component
 struct Index {
   build() {
-    
+
   }
 }
