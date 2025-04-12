@@ -1,6 +1,7 @@
 @Component
 struct MyCom {
   @State count: number = 1
+
   build() {
     Row() {
       Text(this.count.toString())
@@ -14,6 +15,7 @@ struct MyCom {
   }
 }
 
+
 @Component
 struct MyHeader {
   build() {
@@ -21,9 +23,9 @@ struct MyHeader {
       Text('我是头部')
         .fontColor(Color.White)
     }
-      .width('100%')
-      .height(50)
-      .backgroundColor(Color.Brown)
+    .width('100%')
+    .height(50)
+    .backgroundColor(Color.Brown)
   }
 }
 

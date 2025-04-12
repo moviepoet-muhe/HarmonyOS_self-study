@@ -2,7 +2,8 @@
 struct SonCom {
   // 保证父组件的数据变化了, 能够往下响应式的更新
   @Prop sCar: string = ''
-  changeCar = (newCar: string) => {}
+  changeCar: (newCar: string) => void = (newCar: string) => {
+  }
 
   build() {
     Column() {
@@ -27,7 +28,8 @@ struct SonCom {
 @Entry
 @Component
 struct FatherCom {
-  @State fCar:string = '劳斯莱斯'
+  @State fCar: string = '劳斯莱斯'
+
   build() {
     Column() {
       Text(`父组件 - ${this.fCar}`)

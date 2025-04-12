@@ -1,19 +1,41 @@
-import { HelloCom } from '../components/HelloCom'
+@Component
+struct CountDownComponent {
+  @Prop count: number = 0;
+  costOfOneAttempt: number = 1;
+
+  build() {
+    Column() {
+      if (this.count > 0) {
+        Text(`You have ${this.count} Nuggets left`)
+      } else {
+        Text('Game over!')
+      }
+      // @Prop装饰的变量不会同步给父组件
+      Button(`Try again`).onClick(() => {
+        this.count -= this.costOfOneAttempt;
+      })
+    }
+  }
+}
 
 @Entry
 @Component
-struct Index {
+struct ParentComponent {
+  @State countDownStartValue: number = 10;
+
   build() {
     Column() {
-      HelloCom()
-        .width(250)
-        .height(60)
-        .backgroundColor(Color.Gray)
-        .onClick(() => {
-          AlertDialog.show({
-            message: '测试点击'
-          })
-        })
+      Text(`Grant ${this.countDownStartValue} nuggets to play.`)
+      // 父组件的数据源的修改会同步给子组件
+      Button(`+1 - Nuggets in New Game`).onClick(() => {
+        this.countDownStartValue += 1;
+      })
+      // 父组件的修改会同步给子组件
+      Button(`-1  - Nuggets in New Game`).onClick(() => {
+        this.countDownStartValue -= 1;
+      })
+
+      CountDownComponent({ count: this.countDownStartValue, costOfOneAttempt: 2 })
     }
   }
 }

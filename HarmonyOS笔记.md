@@ -2971,11 +2971,41 @@ console.log('全部的数据', Module3.price2)
 Module3.sayHi()
 ```
 
+#### 页面与自定义组件的生命周期
+
+有 `@Entry` 装饰器装饰的组件就是页面组件，没有 `@Entry` 装饰的组件就是普通的自定义组件。
+
+页面生命周期，即被`@Entry`装饰的组件生命周期，提供以下生命周期接口：
+
+- [onPageShow](https://developer.huawei.com/consumer/cn/doc/harmonyos-references/ts-custom-component-lifecycle#onpageshow)：页面每次显示时触发一次，包括路由过程、应用进入前台等场景。
+- [onPageHide](https://developer.huawei.com/consumer/cn/doc/harmonyos-references/ts-custom-component-lifecycle#onpagehide)：页面每次隐藏时触发一次，包括路由过程、应用进入后台等场景。
+- [onBackPress](https://developer.huawei.com/consumer/cn/doc/harmonyos-references/ts-custom-component-lifecycle#onbackpress)：当用户点击返回按钮时触发。
+
+组件生命周期，即一般用@Component装饰的自定义组件的生命周期，提供以下生命周期接口：
+
+- [aboutToAppear](https://developer.huawei.com/consumer/cn/doc/harmonyos-references/ts-custom-component-lifecycle#abouttoappear)：组件即将出现时回调该接口，具体时机为在创建自定义组件的新实例后，在执行其build()函数之前执行。
+- [onDidBuild](https://developer.huawei.com/consumer/cn/doc/harmonyos-references/ts-custom-component-lifecycle#ondidbuild12)：组件build()函数执行完成之后回调该接口，开发者可以在这个阶段进行埋点数据上报等不影响实际UI的功能。不建议在onDidBuild函数中更改状态变量、使用animateTo等功能，这可能会导致不稳定的UI表现。
+- [aboutToDisappear](https://developer.huawei.com/consumer/cn/doc/harmonyos-references/ts-custom-component-lifecycle#abouttodisappear)：aboutToDisappear函数在自定义组件析构销毁之前执行。不允许在aboutToDisappear函数中改变状态变量，特别是@Link变量的修改可能会导致应用程序行为不稳定。
+
+生命周期执行示意图：
+
+![](https://alliance-communityfile-drcn.dbankcdn.com/FileServer/getFile/cmtyPub/011/111/111/0000000000011111111.20250408115820.12775395364516838740036387688441:50001231000000:2800:EFDA50EB01FB5915E1BA7A60A950F10CD9F26CD0DF9FB3A77B3EADA810FDFB40.png)
+
 #### 自定义组件 - 基础
 
 ##### 基本使用
 
 概念：由框架直接提供的称为 系统组件，由开发者定义的称为 自定义组件。
+
+自定义组件具有以下特点：
+
+- 可组合：允许开发者组合使用系统组件、及其属性和方法。
+- 可重用：自定义组件可以被其他组件重用，并作为不同的实例在不同的父组件或容器中使用。
+- 数据驱动UI更新：通过状态变量的改变，来驱动UI的刷新。
+
+**语法：**
+
+利用 `@Component` 装饰器，装饰 `struct` 来自定义组件，struct 的定义类似于 class 的定义。
 
 ```ts
 @Component
@@ -3046,6 +3076,26 @@ struct Index {
   }
 }
 ```
+
+注意:
+
+- 必须实现 build 方法。
+
+- 自定义的组件不能有继承关系。
+- 在其它组件中的 build() 方法内部渲染该自定义组件时，直接使用 `HelloCOmponent()` 进行组件实例创建即可，可以省略 new 书写。
+- 在 struct 结构体中可定义其它的成员属性与成员方法，成员函数和成员属性为私有的，且不建议声明成静态的。
+- 自定义组件中定义的成员属性，在父组件中渲染该自定义组件实例时，都可以以选项配置的方式从父组件中向子组件传递数据进行初始化。
+- 定义在 build() 方法中的语句，我们统称为UI描述，UI描述需要遵循以下规则：
+  - @Entry装饰的自定义组件，其build()函数下的根节点唯一且必要，且必须为容器组件，其中ForEach禁止作为根节点。
+  - 只使用@Component装饰的自定义组件，其build()函数下的根节点唯一且必要，可以为非容器组件，其中ForEach禁止作为根节点。
+  - 不允许声明本地变量。
+  - 不允许在UI描述里直接使用console.info，但允许在方法或者函数里使用。
+  - 不允许创建本地的作用域。
+  - 不允许调用没有用@Builder装饰的方法，允许系统组件的参数是TS方法的返回值。
+  - 不允许使用switch语法，如果需要使用条件判断，请使用[if](https://developer.huawei.com/consumer/cn/doc/harmonyos-guides/arkts-rendering-control-ifelse)。
+  - 不允许使用表达式。
+  - 不允许直接改变状态变量。
+- 自定义组件也能像系统组件一样，使用组件的通用属性、通用事件等。
 
 ##### 通用样式事件
 
